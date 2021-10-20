@@ -537,6 +537,9 @@ class AgentPolicy(AgentWithModel):
         rewards["rew/r_city_tiles"] = (city_tile_count - self.city_tiles_last) * 20#0.1
         self.city_tiles_last = city_tile_count
 
+        if city_tile_count == 0:
+            rewards["rew/r_city_tiles_count"] = -100
+
         # Reward collecting fuel
         fuel_collected = game.stats["teamStats"][self.team]["fuelGenerated"]
         rewards["rew/r_fuel_collected"] = ( (fuel_collected - self.fuel_collected_last) / 1000 )#20000 )
