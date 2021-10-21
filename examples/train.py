@@ -154,7 +154,8 @@ def train(args):
                              n_eval_episodes=30, # Run 30 games
                              deterministic=False, render=False)
         )
-    callbacks.append(TensorboardCallback())
+    if args.n_envs == 1:
+        callbacks.append(TensorboardCallback())
     print("Training model...")
     model.learn(total_timesteps=args.step_count,
                 callback=callbacks)

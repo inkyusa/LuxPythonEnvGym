@@ -177,7 +177,6 @@ class AgentPolicy(AgentWithModel):
         self.observation_shape, dtype=np.float16)
 
         self.object_nodes = {}
-        self.rewards = {}
 
     def get_agent_type(self):
         """
@@ -538,31 +537,26 @@ class AgentPolicy(AgentWithModel):
         rewards["rew/r_city_tiles"] = (city_tile_count - self.city_tiles_last) * 20#0.1
         self.city_tiles_last = city_tile_count
 
-        if city_tile_count == 0:
-            rewards["rew/r_city_tiles_count"] = -100
-
-
         # Reward collecting fuel
         fuel_collected = game.stats["teamStats"][self.team]["fuelGenerated"]
         rewards["rew/r_fuel_collected"] = ( (fuel_collected - self.fuel_collected_last) / 1000 )#20000 )
         self.fuel_collected_last = fuel_collected
-
-        rewards["rew/r_city_tiles"] = city_tile_count * 5
+        
         # Give a reward of 1.0 per city tile alive at the end of the game
-        # rewards["rew/r_city_tiles_end"] = 0
+        rewards["rew/r_city_tiles_end"] = 0
         if is_game_finished:
             self.is_last_turn = True
-            #rewards["rew/r_city_tiles_end"] = city_tile_count
+            rewards["rew/r_city_tiles_end"] = city_tile_count
             # Example of a game win/loss reward instead
             if game.get_winning_team() == self.team:
                 rewards["rew/r_game_win"] = 100.0 # Win
             else:
-               rewards["rew/r_game_win"] = -100.0 # Loss
+                rewards["rew/r_game_win"] = -100.0 # Loss
         
         reward = 0
         for name, value in rewards.items():
             reward += value
-        self.rewards = rewards
+
         return reward
 
     def turn_heurstics(self, game, is_first_turn):
