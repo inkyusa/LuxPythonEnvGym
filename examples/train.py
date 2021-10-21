@@ -5,7 +5,7 @@ import sys
 import random
 
 from stable_baselines3 import PPO  # pip install stable-baselines3
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import EvalCallback, BaseCallback
 from stable_baselines3.common.utils import set_random_seed, get_schedule_fn
 from stable_baselines3.common.vec_env import SubprocVecEnv
 
@@ -13,6 +13,21 @@ from agent_policy import AgentPolicy
 from luxai2021.env.agent import Agent
 from luxai2021.env.lux_env import LuxEnvironment, SaveReplayAndModelCallback
 from luxai2021.game.constants import LuxMatchConfigs_Default
+
+class TensorboardCallback(BaseCallback):
+    """
+    Custom callback for plotting additional values in tensorboard. Only works with
+    single-env training setups. Logs values from Agent.stats at end-of-game.
+    """
+    def __init__(self, verbose=0):
+        super(TensorboardCallback, self).__init__(verbose)
+
+    def _on_step(self) -> bool:
+        for e in self.training_env.envs:
+            if len(e.learning_agent.rewards) != 0:
+                for name, value in e.learning_agent.rewards.items():
+                    self.logger.record(name, value)
+        return True
 
 
 # https://stable-baselines3.readthedocs.io/en/master/guide/examples.html?highlight=SubprocVecEnv#multiprocessing-unleashing-the-power-of-vectorized-environments
@@ -139,7 +154,7 @@ def train(args):
                              n_eval_episodes=30, # Run 30 games
                              deterministic=False, render=False)
         )
-
+    callbacks.append(TensorboardCallback())
     print("Training model...")
     model.learn(total_timesteps=args.step_count,
                 callback=callbacks)
