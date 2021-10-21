@@ -177,6 +177,7 @@ class AgentPolicy(AgentWithModel):
         self.observation_shape, dtype=np.float16)
 
         self.object_nodes = {}
+        self.rewards = {}
 
     def get_agent_type(self):
         """
@@ -556,7 +557,7 @@ class AgentPolicy(AgentWithModel):
         reward = 0
         for name, value in rewards.items():
             reward += value
-
+        self.rewards = rewards
         return reward
 
     def turn_heurstics(self, game, is_first_turn):
