@@ -3,6 +3,7 @@ import glob
 import os
 import sys
 import random
+import numpy as np
 
 from stable_baselines3 import PPO  # pip install stable-baselines3
 from stable_baselines3.common.callbacks import EvalCallback, BaseCallback
@@ -46,7 +47,6 @@ def make_env(local_env, rank, seed=0):
 
     set_random_seed(seed)
     return _init
-
 
 def get_command_line_arguments():
     """
